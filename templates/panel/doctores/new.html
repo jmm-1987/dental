@@ -1,0 +1,46 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Nuevo Doctor{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Nuevo Doctor</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre completo *</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required placeholder="Ej: Dr. Juan Pérez">
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email *</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+                <small class="form-text text-muted">El email será usado para iniciar sesión.</small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña *</label>
+                <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                <small class="form-text text-muted">Mínimo 6 caracteres.</small>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="activo" name="activo" checked>
+                <label class="form-check-label" for="activo">
+                    Doctor activo (puede iniciar sesión y recibir citas)
+                </label>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Crear Doctor
+                </button>
+                <a href="{{ url_for('panel.doctors_list') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

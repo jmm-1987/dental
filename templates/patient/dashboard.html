@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Área - Clínica Dental{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Bienvenido, {{ paciente.nombre }}</h1>
+
+<div class="row g-4 mb-4">
+    <!-- Próximas citas -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Próximas Citas</h5>
+            </div>
+            <div class="card-body">
+                {% if proximas_citas %}
+                <div class="list-group">
+                    {% for cita in proximas_citas %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ cita.fecha_hora_inicio.strftime('%d/%m/%Y') }}</h6>
+                            <span class="badge bg-{{ 'success' if cita.estado == 'confirmada' else 'warning' }}">
+                                {{ cita.estado }}
+                            </span>
+                        </div>
+                        <p class="mb-1"><strong>Hora:</strong> {{ cita.fecha_hora_inicio.strftime('%H:%M') }}</p>
+                        <p class="mb-1"><strong>Dentista:</strong> {{ cita.dentist.nombre }}</p>
+                        {% if cita.motivo %}
+                        <small class="text-muted">{{ cita.motivo }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No tienes citas programadas.</p>
+                {% endif %}
+                <div class="mt-3">
+                    <a href="{{ url_for('patient.citas_list') }}" class="btn btn-outline-primary btn-sm">Ver todas las citas</a>
+                    <a href="{{ url_for('patient.cita_solicitar') }}" class="btn btn-primary btn-sm">Solicitar nueva cita</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tratamientos activos -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-clipboard-pulse"></i> Tratamientos Activos</h5>
+            </div>
+            <div class="card-body">
+                {% if planes_activos %}
+                <div class="list-group">
+                    {% for plan in planes_activos %}
+                    <a href="{{ url_for('patient.tratamiento_detail', plan_id=plan.id) }}" class="list-group-item list-group-item-action">
+                        <h6 class="mb-1">{{ plan.descripcion_general }}</h6>
+                        <p class="mb-1"><strong>Dentista:</strong> {{ plan.dentist_user.nombre }}</p>
+                        <small class="text-muted">Estado: {{ plan.estado }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No tienes tratamientos activos.</p>
+                {% endif %}
+                <div class="mt-3">
+                    <a href="{{ url_for('patient.tratamientos_list') }}" class="btn btn-outline-success btn-sm">Ver todos los tratamientos</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Facturas pendientes -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-receipt"></i> Facturas Pendientes</h5>
+    </div>
+    <div class="card-body">
+        {% if facturas_pendientes %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Pagado</th>
+                        <th>Pendiente</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for factura in facturas_pendientes %}
+                    <tr>
+                        <td>{{ factura.fecha_emision.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ "%.2f"|format(factura.total) }} €</td>
+                        <td>{{ "%.2f"|format(factura.calcular_total_pagado()) }} €</td>
+                        <td><strong class="text-danger">{{ "%.2f"|format(factura.calcular_saldo_pendiente()) }} €</strong></td>
+                        <td>
+                            <span class="badge bg-{{ 'warning' if factura.estado_pago == 'parcial' else 'danger' }}">
+                                {{ factura.estado_pago }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('patient.factura_detail', invoice_id=factura.id) }}" class="btn btn-sm btn-outline-primary">
+                                Ver detalles
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No tienes facturas pendientes.</p>
+        {% endif %}
+        <div class="mt-3">
+            <a href="{{ url_for('patient.facturas_list') }}" class="btn btn-outline-primary btn-sm">Ver todas las facturas</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

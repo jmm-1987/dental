@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitar Cita - Clínica Dental{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Solicitar Nueva Cita</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Selecciona Dentista y Fecha</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="select-dentist" class="form-label">Dentista *</label>
+                <select class="form-select" id="select-dentist" onchange="loadAvailability()" required>
+                    <option value="">Seleccionar dentista...</option>
+                    {% for dentista in dentistas %}
+                    <option value="{{ dentista.id }}">{{ dentista.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Navegación</label>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="previousWeek()">
+                        <i class="bi bi-chevron-left"></i> Anterior
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="nextWeek()">
+                        Siguiente <i class="bi bi-chevron-right"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="goToToday()">Hoy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendario Semanal -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Calendario Semanal</h5>
+    </div>
+    <div class="card-body">
+        <div id="calendar-container">
+            <div class="calendar-header">
+                <div class="calendar-time-col"></div>
+                {% for i in range(7) %}
+                <div class="calendar-day-header">
+                    <div class="day-name" id="day-name-{{ i }}"></div>
+                    <div class="day-date" id="day-date-{{ i }}"></div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="calendar-body" id="calendar-body">
+                <!-- Se llenará con JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para solicitar cita -->
+<div class="modal fade" id="modalSolicitarCita" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Solicitar Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formSolicitarCita">
+                    <input type="hidden" id="cita-start-time" name="start">
+                    <input type="hidden" id="cita-end-time" name="end">
+                    <input type="hidden" id="cita-dentist-id" name="dentist_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Fecha y Hora</label>
+                        <input type="text" class="form-control" id="cita-datetime" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cita-motivo" class="form-label">Motivo de la consulta *</label>
+                        <textarea class="form-control" id="cita-motivo" name="motivo" rows="3" required placeholder="Describe el motivo de tu consulta..."></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Tu solicitud será revisada y te contactaremos para confirmarla.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="requestAppointment()">Solicitar Cita</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/patient-calendar.js') }}"></script>
+{% endblock %}

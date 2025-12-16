@@ -1,0 +1,256 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Nueva Cita{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Nueva Cita</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="patient_search" class="form-label">Paciente *</label>
+                    <div class="position-relative">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="patient_search" placeholder="Buscar paciente..." autocomplete="off">
+                            <input type="hidden" id="patient_id" name="patient_id" required>
+                            <button type="button" class="btn btn-success" id="btn-nuevo-paciente" data-bs-toggle="modal" data-bs-target="#modalNuevoPaciente" title="Crear nuevo paciente">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+                        <div id="patient-results" class="list-group position-absolute w-100" style="display: none; z-index: 1000; max-height: 300px; overflow-y: auto; margin-top: 2px;"></div>
+                    </div>
+                    <small class="form-text text-muted" id="patient-selected-text"></small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="dentist_id" class="form-label">Dentista *</label>
+                    <select class="form-select" id="dentist_id" name="dentist_id" required>
+                        <option value="">Seleccionar dentista...</option>
+                        {% for dentista in dentistas %}
+                        <option value="{{ dentista.id }}">{{ dentista.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="fecha" class="form-label">Fecha *</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="hora_inicio" class="form-label">Hora inicio *</label>
+                    <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="hora_fin" class="form-label">Hora fin *</label>
+                    <input type="time" class="form-control" id="hora_fin" name="hora_fin" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="room_id" class="form-label">Sala/Sillón</label>
+                    <select class="form-select" id="room_id" name="room_id">
+                        <option value="">Seleccionar sala...</option>
+                        {% for sala in salas %}
+                        <option value="{{ sala.id }}">{{ sala.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">O deja en blanco y especifica manualmente:</small>
+                    <input type="text" class="form-control mt-2" id="sillon" name="sillon" placeholder="Sala personalizada (opcional)">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado">
+                        <option value="programada">Programada</option>
+                        <option value="confirmada">Confirmada</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="motivo" class="form-label">Motivo</label>
+                <textarea class="form-control" id="motivo" name="motivo" rows="3"></textarea>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Crear cita
+                </button>
+                <a href="{{ url_for('panel.citas_list') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para crear paciente rápido -->
+<div class="modal fade" id="modalNuevoPaciente" tabindex="-1" aria-labelledby="modalNuevoPacienteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNuevoPacienteLabel">
+                    <i class="bi bi-person-plus"></i> Nuevo Paciente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevoPaciente">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_nombre" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="modal_nombre" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_apellidos" class="form-label">Apellidos *</label>
+                            <input type="text" class="form-control" id="modal_apellidos" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="modal_email" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_telefono" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="modal_telefono">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_dni" class="form-label">DNI/NIF</label>
+                            <input type="text" class="form-control" id="modal_dni">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="modal_direccion" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="modal_direccion">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-guardar-paciente">
+                    <i class="bi bi-check-circle"></i> Crear y seleccionar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let searchTimeout;
+
+// Búsqueda de pacientes
+document.getElementById('patient_search').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    const resultsDiv = document.getElementById('patient-results');
+    
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        fetch(`/panel/api/pacientes/buscar?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsDiv.innerHTML = '';
+                
+                if (data.pacientes && data.pacientes.length > 0) {
+                    data.pacientes.forEach(paciente => {
+                        const item = document.createElement('a');
+                        item.className = 'list-group-item list-group-item-action';
+                        item.href = '#';
+                        item.innerHTML = `
+                            <div class="fw-bold">${paciente.nombre_completo}</div>
+                            <small class="text-muted">${paciente.email}${paciente.telefono ? ' | ' + paciente.telefono : ''}</small>
+                        `;
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            selectPatient(paciente.id, paciente.nombre_completo);
+                        });
+                        resultsDiv.appendChild(item);
+                    });
+                    resultsDiv.style.display = 'block';
+                } else {
+                    resultsDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron pacientes</div>';
+                    resultsDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error al buscar pacientes:', error);
+            });
+    }, 300);
+});
+
+// Seleccionar paciente
+function selectPatient(id, nombreCompleto) {
+    document.getElementById('patient_id').value = id;
+    document.getElementById('patient_search').value = nombreCompleto;
+    document.getElementById('patient-selected-text').textContent = `Paciente seleccionado: ${nombreCompleto}`;
+    document.getElementById('patient-results').style.display = 'none';
+}
+
+// Ocultar resultados al hacer click fuera
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.position-relative')) {
+        document.getElementById('patient-results').style.display = 'none';
+    }
+});
+
+// Crear paciente rápido
+document.getElementById('btn-guardar-paciente').addEventListener('click', function() {
+    const data = {
+        nombre: document.getElementById('modal_nombre').value,
+        apellidos: document.getElementById('modal_apellidos').value,
+        email: document.getElementById('modal_email').value,
+        telefono: document.getElementById('modal_telefono').value,
+        dni: document.getElementById('modal_dni').value,
+        direccion: document.getElementById('modal_direccion').value
+    };
+    
+    fetch('/panel/api/pacientes/crear-rapido', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoPaciente'));
+            modal.hide();
+            
+            // Seleccionar el paciente creado
+            selectPatient(data.paciente.id, data.paciente.nombre_completo);
+            
+            // Limpiar formulario del modal
+            document.getElementById('formNuevoPaciente').reset();
+            
+            // Mostrar mensaje de éxito
+            alert('Paciente creado correctamente');
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al crear el paciente');
+    });
+});
+</script>
+{% endblock %}
+
+
+

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Factura #{{ factura.id }} - Clínica Dental{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Factura #{{ factura.id }}</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Información de la Factura</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-borderless">
+            <tr><th>Fecha emisión:</th><td>{{ factura.fecha_emision.strftime('%d/%m/%Y') }}</td></tr>
+            <tr><th>Total:</th><td><strong>{{ "%.2f"|format(factura.total) }} €</strong></td></tr>
+            <tr><th>Total pagado:</th><td>{{ "%.2f"|format(factura.calcular_total_pagado()) }} €</td></tr>
+            <tr><th>Saldo pendiente:</th><td><strong class="text-danger">{{ "%.2f"|format(factura.calcular_saldo_pendiente()) }} €</strong></td></tr>
+            <tr><th>Estado:</th><td>
+                <span class="badge bg-{{ 'success' if factura.estado_pago == 'pagado' else 'warning' if factura.estado_pago == 'parcial' else 'danger' }}">
+                    {{ factura.estado_pago }}
+                </span>
+            </td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Pagos Registrados</h5>
+    </div>
+    <div class="card-body">
+        {% if pagos %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Cantidad</th>
+                        <th>Método</th>
+                        <th>Referencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pago in pagos %}
+                    <tr>
+                        <td>{{ pago.fecha_pago.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ "%.2f"|format(pago.cantidad) }} €</td>
+                        <td>{{ pago.metodo_pago }}</td>
+                        <td>{{ pago.referencia or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No hay pagos registrados para esta factura.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('patient.facturas_list') }}" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}
+
+
+
+

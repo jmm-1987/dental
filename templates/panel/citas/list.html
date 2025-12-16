@@ -1,0 +1,115 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Citas{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Citas</h1>
+    {% if current_user.is_admin() or current_user.is_recepcionista() %}
+    <a href="{{ url_for('panel.cita_new') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nueva cita
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" name="fecha" value="{{ fecha }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                <select class="form-select" name="estado">
+                    <option value="">Todos</option>
+                    <option value="programada" {% if estado == 'programada' %}selected{% endif %}>Programada</option>
+                    <option value="confirmada" {% if estado == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                    <option value="cancelada" {% if estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                    <option value="realizada" {% if estado == 'realizada' %}selected{% endif %}>Realizada</option>
+                </select>
+            </div>
+            {% if not current_user.is_dentist() %}
+            <div class="col-md-3">
+                <label class="form-label">Dentista</label>
+                <select class="form-select" name="dentist_id">
+                    <option value="">Todos</option>
+                    {% for dentista in dentistas %}
+                    <option value="{{ dentista.id }}" {% if dentist_id == dentista.id %}selected{% endif %}>{{ dentista.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Listado -->
+<div class="card">
+    <div class="card-body">
+        {% if citas %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Fecha/Hora</th>
+                        <th>Paciente</th>
+                        {% if not current_user.is_dentist() %}
+                        <th>Dentista</th>
+                        {% endif %}
+                        <th>Sillón</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cita in citas %}
+                    <tr>
+                        <td>{{ cita.fecha_hora_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ cita.patient.nombre_completo() }}</td>
+                        {% if not current_user.is_dentist() %}
+                        <td>{{ cita.dentist.nombre }}</td>
+                        {% endif %}
+                        <td>{{ cita.sillon or '-' }}</td>
+                        <td>{{ cita.motivo or '-' }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if cita.estado == 'confirmada' else 'warning' if cita.estado == 'programada' else 'secondary' }}">
+                                {{ cita.estado }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if current_user.is_admin() or current_user.is_recepcionista() %}
+                            <a href="{{ url_for('panel.cita_edit', cita_id=cita.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('panel.cita_change_status', cita_id=cita.id) }}" class="d-inline">
+                                <select name="estado" class="form-select form-select-sm d-inline" style="width: auto;" onchange="this.form.submit()">
+                                    <option value="programada" {% if cita.estado == 'programada' %}selected{% endif %}>Programada</option>
+                                    <option value="confirmada" {% if cita.estado == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                                    <option value="cancelada" {% if cita.estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                                    <option value="realizada" {% if cita.estado == 'realizada' %}selected{% endif %}>Realizada</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No se encontraron citas con los filtros seleccionados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+

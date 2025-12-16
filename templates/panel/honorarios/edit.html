@@ -1,0 +1,53 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Editar Honorario{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Editar Honorario</h1>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle"></i> <strong>Doctor:</strong> {{ honorario.doctor.nombre }}
+        </div>
+        
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nombre_tratamiento" class="form-label">Tratamiento *</label>
+                <select class="form-select" 
+                       id="nombre_tratamiento" 
+                       name="nombre_tratamiento" 
+                       required>
+                    <option value="">Seleccionar tratamiento...</option>
+                    {% for tratamiento in tratamientos_lista %}
+                    <option value="{{ tratamiento }}" {% if honorario.nombre_tratamiento == tratamiento %}selected{% endif %}>
+                        {{ tratamiento }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <small class="form-text text-muted">Solo se muestran los tratamientos que este doctor ya ha realizado.</small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio (€) *</label>
+                <input type="number" 
+                       class="form-control" 
+                       id="precio" 
+                       name="precio" 
+                       value="{{ honorario.precio }}"
+                       step="0.01" 
+                       min="0" 
+                       required>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Guardar Cambios
+                </button>
+                <a href="{{ url_for('panel.honorarios_list', doctor_id=honorario.doctor_id) }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

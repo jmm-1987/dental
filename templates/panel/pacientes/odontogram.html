@@ -1,0 +1,235 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Odontograma - {{ paciente.nombre_completo() }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/odontogram.css') }}">
+{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Odontograma</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form id="odontogramForm">
+            <!-- Selector de estado -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="toothStatus" class="form-label">Estado de la pieza seleccionada</label>
+                    <select class="form-select" id="toothStatus">
+                        <option value="">Seleccionar estado...</option>
+                        <option value="sano">Sano</option>
+                        <option value="caries">Caries</option>
+                        <option value="empaste">Empaste</option>
+                        <option value="corona">Corona</option>
+                        <option value="extraccion">Extracción</option>
+                        <option value="ausente">Ausente</option>
+                        <option value="endodoncia">Endodoncia</option>
+                        <option value="implante">Implante</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Pieza seleccionada</label>
+                    <div id="selectedToothInfo" class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> Haz clic en una pieza dental para seleccionarla
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leyenda de colores -->
+            <div class="mb-4">
+                <h6>Leyenda:</h6>
+                <div class="legend-container">
+                    <span class="legend-item"><span class="legend-color sano"></span> Sano</span>
+                    <span class="legend-item"><span class="legend-color caries"></span> Caries</span>
+                    <span class="legend-item"><span class="legend-color empaste"></span> Empaste</span>
+                    <span class="legend-item"><span class="legend-color corona"></span> Corona</span>
+                    <span class="legend-item"><span class="legend-color endodoncia"></span> Endodoncia</span>
+                    <span class="legend-item"><span class="legend-color implante"></span> Implante</span>
+                    <span class="legend-item"><span class="legend-color extraccion"></span> Extracción</span>
+                    <span class="legend-item"><span class="legend-color ausente"></span> Ausente</span>
+                </div>
+            </div>
+            
+            <!-- Odontograma visual -->
+            <div class="odontogram-container">
+                <!-- Vista superior (maxilar) -->
+                <div class="jaw-section">
+                    <div class="jaw-label">Maxilar Superior</div>
+                    <div class="teeth-row">
+                        <!-- Cuadrante 1 (derecha superior) -->
+                        <div class="quadrant quadrant-1">
+                            <div class="tooth" data-tooth="1.8" title="Muela del juicio superior derecha">
+                                <div class="tooth-number">18</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="1.7" title="Segundo molar superior derecho">
+                                <div class="tooth-number">17</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="1.6" title="Primer molar superior derecho">
+                                <div class="tooth-number">16</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="1.5" title="Segundo premolar superior derecho">
+                                <div class="tooth-number">15</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="1.4" title="Primer premolar superior derecho">
+                                <div class="tooth-number">14</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="1.3" title="Canino superior derecho">
+                                <div class="tooth-number">13</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="1.2" title="Incisivo lateral superior derecho">
+                                <div class="tooth-number">12</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="1.1" title="Incisivo central superior derecho">
+                                <div class="tooth-number">11</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cuadrante 2 (izquierda superior) -->
+                        <div class="quadrant quadrant-2">
+                            <div class="tooth" data-tooth="2.1" title="Incisivo central superior izquierdo">
+                                <div class="tooth-number">21</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="2.2" title="Incisivo lateral superior izquierdo">
+                                <div class="tooth-number">22</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="2.3" title="Canino superior izquierdo">
+                                <div class="tooth-number">23</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="2.4" title="Primer premolar superior izquierdo">
+                                <div class="tooth-number">24</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="2.5" title="Segundo premolar superior izquierdo">
+                                <div class="tooth-number">25</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="2.6" title="Primer molar superior izquierdo">
+                                <div class="tooth-number">26</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="2.7" title="Segundo molar superior izquierdo">
+                                <div class="tooth-number">27</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="2.8" title="Muela del juicio superior izquierda">
+                                <div class="tooth-number">28</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vista inferior (mandíbula) -->
+                <div class="jaw-section">
+                    <div class="jaw-label">Mandíbula Inferior</div>
+                    <div class="teeth-row">
+                        <!-- Cuadrante 3 (izquierda inferior) -->
+                        <div class="quadrant quadrant-3">
+                            <div class="tooth" data-tooth="3.8" title="Muela del juicio inferior izquierda">
+                                <div class="tooth-number">38</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="3.7" title="Segundo molar inferior izquierdo">
+                                <div class="tooth-number">37</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="3.6" title="Primer molar inferior izquierdo">
+                                <div class="tooth-number">36</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="3.5" title="Segundo premolar inferior izquierdo">
+                                <div class="tooth-number">35</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="3.4" title="Primer premolar inferior izquierdo">
+                                <div class="tooth-number">34</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="3.3" title="Canino inferior izquierdo">
+                                <div class="tooth-number">33</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="3.2" title="Incisivo lateral inferior izquierdo">
+                                <div class="tooth-number">32</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="3.1" title="Incisivo central inferior izquierdo">
+                                <div class="tooth-number">31</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cuadrante 4 (derecha inferior) -->
+                        <div class="quadrant quadrant-4">
+                            <div class="tooth" data-tooth="4.1" title="Incisivo central inferior derecho">
+                                <div class="tooth-number">41</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="4.2" title="Incisivo lateral inferior derecho">
+                                <div class="tooth-number">42</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="4.3" title="Canino inferior derecho">
+                                <div class="tooth-number">43</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="4.4" title="Primer premolar inferior derecho">
+                                <div class="tooth-number">44</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="4.5" title="Segundo premolar inferior derecho">
+                                <div class="tooth-number">45</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="4.6" title="Primer molar inferior derecho">
+                                <div class="tooth-number">46</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="4.7" title="Segundo molar inferior derecho">
+                                <div class="tooth-number">47</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                            <div class="tooth" data-tooth="4.8" title="Muela del juicio inferior derecha">
+                                <div class="tooth-number">48</div>
+                                <div class="tooth-shape"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3 mt-4">
+                <label for="notas" class="form-label">Notas generales</label>
+                <textarea class="form-control" id="notas" name="notas" rows="3">{{ odontogram.notas if odontogram else '' }}</textarea>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary" onclick="saveOdontogram()">
+                    <i class="bi bi-check-circle"></i> Guardar odontograma
+                </button>
+                <a href="{{ url_for('panel.paciente_detail', patient_id=paciente.id) }}" class="btn btn-secondary">Volver</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/tooth-svg.js') }}"></script>
+<script src="{{ url_for('static', filename='js/odontogram.js') }}"></script>
+<script>
+    // Inicializar odontograma con datos existentes
+    const initialData = {{ datos_piezas | tojson if datos_piezas else '{}' }};
+    initOdontogram(initialData, '{{ url_for("panel.odontogram_edit", patient_id=paciente.id) }}');
+</script>
+{% endblock %}

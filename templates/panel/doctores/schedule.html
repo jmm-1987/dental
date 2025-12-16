@@ -1,0 +1,99 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Horario de Trabajo - {{ doctor.nombre }}{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Horario de Trabajo</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="mb-0"><strong>Doctor:</strong> {{ doctor.nombre }}</p>
+        <p class="mb-0"><strong>Email:</strong> {{ doctor.email }}</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Configurar Días de Trabajo</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Selecciona los días de la semana en los que trabaja este doctor y establece sus horarios.
+            </div>
+            
+            {% for dia_num, dia_nombre in dias_semana %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="dia_{{ dia_num }}" 
+                                       name="dias" 
+                                       value="{{ dia_num }}"
+                                       {% if dia_num in horarios_dict %}checked{% endif %}
+                                       onchange="toggleDaySchedule({{ dia_num }})">
+                                <label class="form-check-label" for="dia_{{ dia_num }}">
+                                    <strong>{{ dia_nombre }}</strong>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-10" id="schedule_{{ dia_num }}" style="{% if dia_num not in horarios_dict %}display: none;{% endif %}">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <label for="hora_inicio_{{ dia_num }}" class="form-label">Hora Inicio</label>
+                                    <input type="time" 
+                                           class="form-control" 
+                                           id="hora_inicio_{{ dia_num }}" 
+                                           name="hora_inicio_{{ dia_num }}"
+                                           value="{% if dia_num in horarios_dict %}{{ horarios_dict[dia_num].hora_inicio.strftime('%H:%M') }}{% else %}09:00{% endif %}"
+                                           required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="hora_fin_{{ dia_num }}" class="form-label">Hora Fin</label>
+                                    <input type="time" 
+                                           class="form-control" 
+                                           id="hora_fin_{{ dia_num }}" 
+                                           name="hora_fin_{{ dia_num }}"
+                                           value="{% if dia_num in horarios_dict %}{{ horarios_dict[dia_num].hora_fin.strftime('%H:%M') }}{% else %}20:00{% endif %}"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Guardar Horario
+                </button>
+                <a href="{{ url_for('panel.doctors_list') }}" class="btn btn-secondary">Volver</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleDaySchedule(diaNum) {
+    const checkbox = document.getElementById('dia_' + diaNum);
+    const schedule = document.getElementById('schedule_' + diaNum);
+    const horaInicio = document.getElementById('hora_inicio_' + diaNum);
+    const horaFin = document.getElementById('hora_fin_' + diaNum);
+    
+    if (checkbox.checked) {
+        schedule.style.display = 'block';
+        horaInicio.required = true;
+        horaFin.required = true;
+    } else {
+        schedule.style.display = 'none';
+        horaInicio.required = false;
+        horaFin.required = false;
+    }
+}
+</script>
+{% endblock %}
+
+

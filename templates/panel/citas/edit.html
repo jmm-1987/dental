@@ -1,0 +1,93 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Editar Cita{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Editar Cita</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="patient_id" class="form-label">Paciente *</label>
+                    <select class="form-select" id="patient_id" name="patient_id" required>
+                        {% for paciente in pacientes %}
+                        <option value="{{ paciente.id }}" {% if cita.patient_id == paciente.id %}selected{% endif %}>{{ paciente.nombre_completo() }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="dentist_id" class="form-label">Dentista *</label>
+                    <select class="form-select" id="dentist_id" name="dentist_id" required>
+                        {% for dentista in dentistas %}
+                        <option value="{{ dentista.id }}" {% if cita.dentist_id == dentista.id %}selected{% endif %}>{{ dentista.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="fecha" class="form-label">Fecha *</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" value="{{ cita.fecha_hora_inicio.strftime('%Y-%m-%d') }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="hora_inicio" class="form-label">Hora inicio *</label>
+                    <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" value="{{ cita.fecha_hora_inicio.strftime('%H:%M') }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="hora_fin" class="form-label">Hora fin *</label>
+                    <input type="time" class="form-control" id="hora_fin" name="hora_fin" value="{{ cita.fecha_hora_fin.strftime('%H:%M') }}" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="room_id" class="form-label">Sala/Sillón</label>
+                    <select class="form-select" id="room_id" name="room_id">
+                        <option value="">Seleccionar sala...</option>
+                        {% for sala in salas %}
+                        <option value="{{ sala.id }}" {% if cita.room_id == sala.id %}selected{% endif %}>{{ sala.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">O especifica manualmente:</small>
+                    <input type="text" class="form-control mt-2" id="sillon" name="sillon" value="{{ cita.sillon or '' }}" placeholder="Sala personalizada (opcional)">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado">
+                        <option value="programada" {% if cita.estado == 'programada' %}selected{% endif %}>Programada</option>
+                        <option value="confirmada" {% if cita.estado == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                        <option value="cancelada" {% if cita.estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                        <option value="realizada" {% if cita.estado == 'realizada' %}selected{% endif %}>Realizada</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="motivo" class="form-label">Motivo</label>
+                <textarea class="form-control" id="motivo" name="motivo" rows="3">{{ cita.motivo or '' }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="notas" class="form-label">Notas</label>
+                <textarea class="form-control" id="notas" name="notas" rows="3">{{ cita.notas or '' }}</textarea>
+            </div>
+            
+            {% if from_dashboard %}
+            <input type="hidden" name="from" value="dashboard">
+            {% endif %}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Guardar cambios
+                </button>
+                <a href="{% if from_dashboard %}{{ url_for('panel.dashboard') }}{% else %}{{ url_for('panel.citas_list') }}{% endif %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+
+

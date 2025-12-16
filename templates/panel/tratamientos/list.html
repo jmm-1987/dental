@@ -1,0 +1,68 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Planes de Tratamiento - {{ paciente.nombre_completo() }}{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Planes de Tratamiento</h1>
+
+<!-- Formulario nuevo plan -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Nuevo Plan de Tratamiento</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="dentist_id" class="form-label">Dentista responsable *</label>
+                    <select class="form-select" id="dentist_id" name="dentist_id" required>
+                        <option value="">Seleccionar...</option>
+                        {% for dentista in dentistas %}
+                        <option value="{{ dentista.id }}">{{ dentista.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="coste_estimado" class="form-label">Coste estimado (€)</label>
+                    <input type="number" step="0.01" class="form-control" id="coste_estimado" name="coste_estimado" value="0">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="descripcion_general" class="form-label">Descripción general *</label>
+                <textarea class="form-control" id="descripcion_general" name="descripcion_general" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Crear plan
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Listado de planes -->
+<div class="card">
+    <div class="card-body">
+        {% if planes %}
+        <div class="list-group">
+            {% for plan in planes %}
+            <a href="{{ url_for('panel.treatment_plan_detail', plan_id=plan.id) }}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">{{ plan.descripcion_general }}</h6>
+                    <span class="badge bg-{{ 'success' if plan.estado == 'finalizado' else 'warning' if plan.estado == 'en_curso' else 'secondary' }}">
+                        {{ plan.estado }}
+                    </span>
+                </div>
+                <p class="mb-1">Dentista: {{ plan.dentist_user.nombre }}</p>
+                <small>Coste estimado: {{ "%.2f"|format(plan.coste_estimado) }} € | Creado: {{ plan.fecha_creacion.strftime('%d/%m/%Y') }}</small>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No hay planes de tratamiento registrados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+

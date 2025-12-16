@@ -1,0 +1,100 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Facturas{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Facturas</h1>
+    <img src="{{ url_for('static', filename='logo_Verifactu.png') }}" alt="Verifactu" height="50">
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                <select class="form-select" name="estado">
+                    <option value="">Todos</option>
+                    <option value="pendiente" {% if estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                    <option value="parcial" {% if estado == 'parcial' %}selected{% endif %}>Parcial</option>
+                    <option value="pagado" {% if estado == 'pagado' %}selected{% endif %}>Pagado</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Paciente</label>
+                <select class="form-select" name="patient_id">
+                    <option value="">Todos</option>
+                    {% for paciente in pacientes %}
+                    <option value="{{ paciente.id }}" {% if patient_id == paciente.id %}selected{% endif %}>{{ paciente.nombre_completo() }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Desde</label>
+                <input type="date" class="form-control" name="fecha_desde" value="{{ fecha_desde }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Hasta</label>
+                <input type="date" class="form-control" name="fecha_hasta" value="{{ fecha_hasta }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Listado -->
+<div class="card">
+    <div class="card-body">
+        {% if facturas %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nº Factura</th>
+                        <th>Fecha</th>
+                        <th>Paciente</th>
+                        <th>Total</th>
+                        <th>Pagado</th>
+                        <th>Pendiente</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for factura in facturas %}
+                    <tr>
+                        <td>#{{ factura.id }}</td>
+                        <td>{{ factura.fecha_emision.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ factura.patient.nombre_completo() }}</td>
+                        <td>{{ "%.2f"|format(factura.total) }} €</td>
+                        <td>{{ "%.2f"|format(factura.calcular_total_pagado()) }} €</td>
+                        <td>{{ "%.2f"|format(factura.calcular_saldo_pendiente()) }} €</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if factura.estado_pago == 'pagado' else 'warning' if factura.estado_pago == 'parcial' else 'danger' }}">
+                                {{ factura.estado_pago }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('panel.invoice_detail', invoice_id=factura.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Ver
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No se encontraron facturas con los filtros seleccionados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+

@@ -1,0 +1,103 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Pacientes{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Pacientes</h1>
+    <a href="{{ url_for('panel.paciente_new') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo paciente
+    </a>
+</div>
+
+<!-- Búsqueda -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-10">
+                <input type="text" class="form-control" name="search" placeholder="Buscar por nombre, apellidos, email o DNI..." value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Listado -->
+<div class="card">
+    <div class="card-body">
+        {% if pacientes.items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>DNI</th>
+                        <th>Fecha alta</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paciente in pacientes.items %}
+                    <tr>
+                        <td>{{ paciente.nombre_completo() }}</td>
+                        <td>{{ paciente.email }}</td>
+                        <td>{{ paciente.telefono or '-' }}</td>
+                        <td>{{ paciente.dni or '-' }}</td>
+                        <td>{{ paciente.fecha_alta.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('panel.paciente_detail', patient_id=paciente.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Ver
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginación -->
+        {% if pacientes.pages > 1 %}
+        <nav>
+            <ul class="pagination">
+                {% if pacientes.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ pacientes.prev_num }}{% if search %}&search={{ search }}{% endif %}">Anterior</a>
+                </li>
+                {% endif %}
+                {% for page_num in pacientes.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pacientes.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_num }}{% if search %}&search={{ search }}{% endif %}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+                {% if pacientes.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ pacientes.next_num }}{% if search %}&search={{ search }}{% endif %}">Siguiente</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <p class="text-muted">No se encontraron pacientes.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+

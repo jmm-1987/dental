@@ -1,0 +1,437 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Fichaje de Empleados{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+<style>
+    /* Asegurar que el menú del panel no se vea afectado */
+    .panel-nav {
+        background-color: #fff !important;
+        border-bottom: 2px solid #dee2e6 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        margin-bottom: 20px !important;
+    }
+    .panel-nav .nav {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    .panel-nav .nav-link {
+        color: #495057 !important;
+        padding: 15px 20px !important;
+        font-weight: 500 !important;
+        border-bottom: 3px solid transparent !important;
+        transition: all 0.3s !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
+    }
+    .panel-nav .nav-link:hover {
+        color: #0d6efd !important;
+        background-color: #f8f9fa !important;
+        border-bottom-color: #0d6efd !important;
+    }
+    .panel-nav .nav-link.active {
+        color: #0d6efd !important;
+        border-bottom-color: #0d6efd !important;
+        background-color: #f8f9fa !important;
+    }
+    
+    .fichaje-calendar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .fichaje-day-row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 10px;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+    }
+    
+    .fichaje-day-header {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #495057;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        text-align: center;
+    }
+    
+    .fichaje-employees-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .fichaje-employee-row {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border-left: 4px solid #0d6efd;
+    }
+    
+    .fichaje-employee-row.has-extras {
+        border-left-color: #ffc107;
+        background-color: #fff3cd;
+    }
+    
+    .fichaje-employee-name {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .fichaje-details {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .fichaje-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .fichaje-time {
+        font-weight: bold;
+        color: #0d6efd;
+        font-size: 0.9rem;
+    }
+    
+    .fichaje-hours {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .fichaje-extras {
+        font-size: 0.85rem;
+        color: #856404;
+        font-weight: bold;
+    }
+    
+    .no-fichaje {
+        color: #6c757d;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Vista Semanal de Fichajes</h1>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="fecha" class="form-label">Semana</label>
+                <input type="date" class="form-control" id="fecha" name="fecha" value="{{ start_of_week }}">
+            </div>
+            <div class="col-md-3">
+                <label for="user_id" class="form-label">Empleado</label>
+                <select class="form-select" id="user_id" name="user_id">
+                    <option value="">Todos</option>
+                    {% for empleado in empleados %}
+                    <option value="{{ empleado.id }}" {% if user_id == empleado.id %}selected{% endif %}>
+                        {{ empleado.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="previousWeek()">
+                    <i class="bi bi-chevron-left"></i> Anterior
+                </button>
+                <button type="button" class="btn btn-primary" onclick="goToToday()">Hoy</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="nextWeek()">
+                    Siguiente <i class="bi bi-chevron-right"></i>
+                </button>
+                <a href="{{ url_for('panel.fichaje_new') }}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Nuevo Fichaje
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Calendario Semanal -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h4 class="mb-0">
+            <i class="bi bi-calendar-week"></i> 
+            Semana del {{ start_of_week.strftime('%d/%m/%Y') }} al {{ end_of_week.strftime('%d/%m/%Y') }}
+        </h4>
+    </div>
+    <div class="card-body">
+        <div id="fichaje-calendar-container">
+            <div class="fichaje-calendar" id="fichaje-calendar-body">
+                <!-- Se llenará con JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen semanal -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Resumen Semanal</h5>
+    </div>
+    <div class="card-body">
+        <div id="resumen-semanal" class="row">
+            <!-- Se llenará con JavaScript -->
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('panel.dias_libres_list') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-calendar-x"></i> Días Libres
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentWeekStart = new Date('{{ start_of_week.isoformat() }}');
+let fichajes = [];
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+}
+
+function previousWeek() {
+    currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    loadFichajes();
+    updateDateInput();
+}
+
+function nextWeek() {
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    loadFichajes();
+    updateDateInput();
+}
+
+function goToToday() {
+    currentWeekStart = getWeekStart(new Date());
+    loadFichajes();
+    updateDateInput();
+}
+
+function updateDateInput() {
+    document.getElementById('fecha').value = formatDate(currentWeekStart);
+}
+
+function loadFichajes() {
+    const fechaStr = formatDate(currentWeekStart);
+    const userId = document.getElementById('user_id').value;
+    
+    // Actualizar encabezados
+    for (let i = 0; i < 7; i++) {
+        const fecha = new Date(currentWeekStart);
+        fecha.setDate(fecha.getDate() + i);
+        
+        const dayName = document.getElementById(`day-name-${i}`);
+        const dayDate = document.getElementById(`day-date-${i}`);
+        
+        if (dayName) dayName.textContent = diasSemana[i];
+        if (dayDate) {
+            dayDate.textContent = `${fecha.getDate()} ${meses[fecha.getMonth()]}`;
+        }
+    }
+    
+    // Cargar fichajes
+    let url = `/panel/fichaje/semana?fecha=${fechaStr}`;
+    if (userId) {
+        url += `&user_id=${userId}`;
+    }
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            fichajes = data.fichajes;
+            renderFichajeCalendar();
+            renderResumen();
+        })
+        .catch(error => {
+            console.error('Error al cargar fichajes:', error);
+        });
+}
+
+function renderFichajeCalendar() {
+    const calendarBody = document.getElementById('fichaje-calendar-body');
+    if (!calendarBody) return;
+    
+    // Agrupar fichajes por día y luego por empleado
+    const fichajesPorDia = {};
+    fichajes.forEach(f => {
+        if (!fichajesPorDia[f.fecha]) {
+            fichajesPorDia[f.fecha] = {};
+        }
+        if (!fichajesPorDia[f.fecha][f.user_id]) {
+            fichajesPorDia[f.fecha][f.user_id] = {
+                nombre: f.user_name,
+                fichajes: []
+            };
+        }
+        fichajesPorDia[f.fecha][f.user_id].fichajes.push(f);
+    });
+    
+    // Obtener lista de empleados únicos (para mostrar todos aunque no tengan fichaje)
+    const empleadosIds = new Set();
+    fichajes.forEach(f => empleadosIds.add(f.user_id));
+    const empleadosNombres = {};
+    fichajes.forEach(f => {
+        if (!empleadosNombres[f.user_id]) {
+            empleadosNombres[f.user_id] = f.user_name;
+        }
+    });
+    
+    // Generar días de la semana
+    const diasSemanaArray = [];
+    for (let i = 0; i < 7; i++) {
+        const fecha = new Date(currentWeekStart);
+        fecha.setDate(fecha.getDate() + i);
+        const fechaStr = formatDate(fecha);
+        const fechaObj = new Date(fecha);
+        diasSemanaArray.push({
+            fecha: fechaStr,
+            nombre: diasSemana[i],
+            dia: fechaObj.getDate(),
+            mes: meses[fechaObj.getMonth()]
+        });
+    }
+    
+    // Renderizar calendario por días
+    let html = '';
+    diasSemanaArray.forEach(dia => {
+        const fichajesDelDia = fichajesPorDia[dia.fecha] || {};
+        
+        html += `
+            <div class="fichaje-day-row">
+                <div class="fichaje-day-header">
+                    <div>${dia.nombre}</div>
+                    <div style="font-size: 0.9rem; color: #6c757d; margin-top: 5px;">
+                        ${dia.dia} ${dia.mes}
+                    </div>
+                </div>
+                <div class="fichaje-employees-container">
+        `;
+        
+        // Mostrar fichajes de cada empleado
+        if (Object.keys(fichajesDelDia).length > 0) {
+            Object.keys(fichajesDelDia).forEach(userId => {
+                const empleadoData = fichajesDelDia[userId];
+                empleadoData.fichajes.forEach(fichaje => {
+                    const hasExtras = fichaje.horas_extras > 0;
+                    html += `
+                        <div class="fichaje-employee-row ${hasExtras ? 'has-extras' : ''}">
+                            <div class="fichaje-employee-name">${empleadoData.nombre}</div>
+                            <div class="fichaje-details">
+                                <div class="fichaje-entry">
+                                    ${fichaje.hora_entrada ? `<div class="fichaje-time">Entrada: ${fichaje.hora_entrada}</div>` : ''}
+                                    ${fichaje.hora_salida ? `<div class="fichaje-time">Salida: ${fichaje.hora_salida}</div>` : ''}
+                                </div>
+                                <div class="fichaje-entry">
+                                    <div class="fichaje-hours">Horas: ${fichaje.horas_trabajadas}h</div>
+                                    ${hasExtras ? `<div class="fichaje-extras">Extras: ${fichaje.horas_extras}h</div>` : ''}
+                                </div>
+                                ${fichaje.notas ? `<div class="fichaje-entry"><small style="color: #6c757d;">${fichaje.notas.substring(0, 40)}</small></div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        } else {
+            html += `<div class="no-fichaje">No hay fichajes registrados este día</div>`;
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    calendarBody.innerHTML = html || '<div class="text-center p-4"><p class="text-muted">No hay fichajes registrados esta semana</p></div>';
+}
+
+function renderResumen() {
+    const resumenDiv = document.getElementById('resumen-semanal');
+    if (!resumenDiv) return;
+    
+    // Agrupar por empleado y calcular totales
+    const resumenes = {};
+    fichajes.forEach(f => {
+        if (!resumenes[f.user_id]) {
+            resumenes[f.user_id] = {
+                nombre: f.user_name,
+                total_horas: 0,
+                total_extras: 0,
+                dias_trabajados: 0
+            };
+        }
+        resumenes[f.user_id].total_horas += f.horas_trabajadas;
+        resumenes[f.user_id].total_extras += f.horas_extras;
+        if (f.hora_entrada && f.hora_salida) {
+            resumenes[f.user_id].dias_trabajados++;
+        }
+    });
+    
+    let html = '';
+    Object.values(resumenes).forEach(resumen => {
+        html += `
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">${resumen.nombre}</h6>
+                        <p class="mb-1"><strong>Horas:</strong> ${resumen.total_horas.toFixed(2)}h</p>
+                        <p class="mb-1"><strong>Extras:</strong> <span class="text-warning">${resumen.total_extras.toFixed(2)}h</span></p>
+                        <p class="mb-0"><strong>Días:</strong> ${resumen.dias_trabajados}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    resumenDiv.innerHTML = html || '<div class="col-12"><p class="text-muted">No hay datos para mostrar</p></div>';
+}
+
+// Cargar al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+    loadFichajes();
+    
+    // Actualizar al cambiar filtros
+    document.getElementById('user_id').addEventListener('change', loadFichajes);
+});
+</script>
+{% endblock %}

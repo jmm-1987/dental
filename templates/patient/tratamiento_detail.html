@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Tratamiento - Clínica Dental{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Detalle del Tratamiento</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">{{ plan.descripcion_general }}</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Dentista:</strong> {{ plan.dentist_user.nombre }}</p>
+        <p><strong>Estado:</strong> 
+            <span class="badge bg-{{ 'success' if plan.estado == 'finalizado' else 'warning' if plan.estado == 'en_curso' else 'secondary' }}">
+                {{ plan.estado }}
+            </span>
+        </p>
+        <p><strong>Coste estimado:</strong> {{ "%.2f"|format(plan.coste_estimado) }} €</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Actos del Tratamiento</h5>
+    </div>
+    <div class="card-body">
+        {% if items %}
+        <div class="list-group">
+            {% for item in items %}
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <div>
+                        <h6 class="mb-1">{{ item.nombre_tratamiento }}</h6>
+                        {% if item.pieza_dental %}
+                        <p class="mb-1"><small>Pieza dental: {{ item.pieza_dental }}</small></p>
+                        {% endif %}
+                        {% if item.fecha_prevista %}
+                        <p class="mb-1"><small>Fecha prevista: {{ item.fecha_prevista.strftime('%d/%m/%Y') }}</small></p>
+                        {% endif %}
+                        {% if item.fecha_realizacion %}
+                        <p class="mb-1"><small class="text-success">Realizado el: {{ item.fecha_realizacion.strftime('%d/%m/%Y') }}</small></p>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-{{ 'success' if item.estado == 'realizado' else 'warning' if item.estado == 'pendiente' else 'secondary' }}">
+                        {{ item.estado }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No hay actos registrados en este tratamiento.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('patient.tratamientos_list') }}" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}
+
+
+
+

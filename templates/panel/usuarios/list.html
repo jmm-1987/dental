@@ -1,0 +1,99 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Usuarios{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Usuarios</h1>
+    <a href="{{ url_for('panel.user_new') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Usuario
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="rol" class="form-label">Filtrar por Rol</label>
+                <select class="form-select" id="rol" name="rol" onchange="this.form.submit()">
+                    <option value="">Todos los roles</option>
+                    <option value="admin" {% if rol_filtro == 'admin' %}selected{% endif %}>Administradores</option>
+                    <option value="recepcionista" {% if rol_filtro == 'recepcionista' %}selected{% endif %}>Recepcionistas</option>
+                    <option value="dentista" {% if rol_filtro == 'dentista' %}selected{% endif %}>Dentistas</option>
+                    <option value="auxiliar" {% if rol_filtro == 'auxiliar' %}selected{% endif %}>Auxiliares</option>
+                    <option value="comercial" {% if rol_filtro == 'comercial' %}selected{% endif %}>Comerciales</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if usuarios %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Fecha creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td><strong>{{ usuario.nombre }}</strong></td>
+                        <td>{{ usuario.email }}</td>
+                        <td>
+                            {% if usuario.rol == 'admin' %}
+                            <span class="badge bg-danger">Administrador</span>
+                            {% elif usuario.rol == 'recepcionista' %}
+                            <span class="badge bg-info">Recepcionista</span>
+                            {% elif usuario.rol == 'dentista' %}
+                            <span class="badge bg-primary">Dentista</span>
+                            {% elif usuario.rol == 'auxiliar' %}
+                            <span class="badge bg-success">Auxiliar</span>
+                            {% elif usuario.rol == 'comercial' %}
+                            <span class="badge bg-warning text-dark">Comercial</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ usuario.rol }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if usuario.activo %}
+                            <span class="badge bg-success">Activo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ usuario.fecha_creacion.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('panel.user_edit', user_id=usuario.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            {% if usuario.rol == 'dentista' %}
+                            <a href="{{ url_for('panel.user_schedule', user_id=usuario.id) }}" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-calendar-week"></i> Horario
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No hay usuarios registrados. 
+            <a href="{{ url_for('panel.user_new') }}" class="alert-link">Crear el primer usuario</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

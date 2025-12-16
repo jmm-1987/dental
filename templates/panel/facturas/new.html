@@ -1,0 +1,43 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Nueva Factura{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Nueva Factura</h1>
+
+<div class="card">
+    <div class="card-body">
+        <p><strong>Paciente:</strong> {{ paciente.nombre_completo() }}</p>
+        
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="total" class="form-label">Total (€) *</label>
+                    <input type="number" step="0.01" class="form-control" id="total" name="total" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="metodo_pago" class="form-label">Método de pago</label>
+                    <select class="form-select" id="metodo_pago" name="metodo_pago">
+                        <option value="">Seleccionar...</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="financiacion">Financiación</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Crear factura
+                </button>
+                <a href="{{ url_for('panel.paciente_detail', patient_id=paciente.id) }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

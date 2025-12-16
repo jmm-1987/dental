@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Tratamientos - Clínica Dental{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Mis Tratamientos</h1>
+
+{% if planes_data %}
+<div class="row g-4">
+    {% for plan_data in planes_data %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ plan_data.plan.descripcion_general }}</h5>
+                    <span class="badge bg-{{ 'success' if plan_data.plan.estado == 'finalizado' else 'warning' if plan_data.plan.estado == 'en_curso' else 'secondary' }}">
+                        {{ plan_data.plan.estado }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p><strong>Dentista:</strong> {{ plan_data.plan.dentist_user.nombre }}</p>
+                <p><strong>Coste estimado:</strong> {{ "%.2f"|format(plan_data.plan.coste_estimado) }} €</p>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small>Progreso</small>
+                        <small>{{ plan_data.items_realizados }} / {{ plan_data.total_items }} actos realizados</small>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ plan_data.progreso }}%">
+                            {{ "%.0f"|format(plan_data.progreso) }}%
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('patient.tratamiento_detail', plan_id=plan_data.plan.id) }}" class="btn btn-outline-primary btn-sm">
+                    Ver detalles
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center">
+        <p class="text-muted">No tienes tratamientos registrados.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+
+
+

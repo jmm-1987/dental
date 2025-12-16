@@ -1,0 +1,112 @@
+/* Estilos personalizados para la aplicación de clínica dental */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --light-bg: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+}
+
+.hero-section {
+    background: url('/static/fondo.png') center center no-repeat;
+    background-size: 100% 100%;
+    padding: 80px 0;
+    position: relative;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa; /* Color de fondo por si la imagen no cubre todo */
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 2px solid var(--light-bg);
+    font-weight: 600;
+}
+
+.btn {
+    border-radius: 5px;
+    padding: 8px 16px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0a58ca;
+    border-color: #0a58ca;
+}
+
+.table {
+    background-color: #fff;
+}
+
+.table thead {
+    background-color: var(--light-bg);
+}
+
+.badge {
+    padding: 6px 12px;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link {
+    color: var(--secondary-color);
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background-color: transparent;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 50px 0;
+        min-height: 400px;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+
+
+

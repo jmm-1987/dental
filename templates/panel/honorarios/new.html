@@ -1,0 +1,106 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Nuevo Honorario{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Nuevo Honorario</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="doctor_id" class="form-label">Doctor *</label>
+                <select class="form-select" id="doctor_id" name="doctor_id" required onchange="updateTratamientos()">
+                    <option value="">Seleccionar doctor...</option>
+                    {% for doctor in doctores %}
+                    <option value="{{ doctor.id }}" {% if doctor_id == doctor.id %}selected{% endif %}>
+                        {{ doctor.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="nombre_tratamiento" class="form-label">Tratamiento *</label>
+                <select class="form-select" 
+                       id="nombre_tratamiento" 
+                       name="nombre_tratamiento" 
+                       required 
+                       disabled>
+                    <option value="">Primero selecciona un doctor</option>
+                </select>
+                <small class="form-text text-muted">Solo se muestran los tratamientos que este doctor ya ha realizado.</small>
+            </div>
+            
+            <!-- Datos ocultos para JavaScript -->
+            <script type="application/json" id="tratamientos-data">
+            {{ tratamientos_por_doctor | tojson }}
+            </script>
+            
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio (€) *</label>
+                <input type="number" 
+                       class="form-control" 
+                       id="precio" 
+                       name="precio" 
+                       step="0.01" 
+                       min="0" 
+                       required 
+                       placeholder="0.00">
+                <small class="form-text text-muted">Precio que se pagará al doctor por realizar este tratamiento.</small>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Crear Honorario
+                </button>
+                <a href="{{ url_for('panel.honorarios_list') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function updateTratamientos() {
+    const doctorSelect = document.getElementById('doctor_id');
+    const tratamientoSelect = document.getElementById('nombre_tratamiento');
+    const doctorId = doctorSelect.value;
+    
+    // Obtener datos de tratamientos
+    const tratamientosData = JSON.parse(document.getElementById('tratamientos-data').textContent);
+    
+    // Limpiar opciones actuales
+    tratamientoSelect.innerHTML = '<option value="">Seleccionar tratamiento...</option>';
+    
+    if (doctorId && tratamientosData[doctorId]) {
+        // Habilitar el select
+        tratamientoSelect.disabled = false;
+        
+        // Añadir tratamientos del doctor seleccionado
+        tratamientosData[doctorId].forEach(function(tratamiento) {
+            const option = document.createElement('option');
+            option.value = tratamiento;
+            option.textContent = tratamiento;
+            tratamientoSelect.appendChild(option);
+        });
+        
+        if (tratamientosData[doctorId].length === 0) {
+            tratamientoSelect.innerHTML = '<option value="">Este doctor no tiene tratamientos registrados</option>';
+            tratamientoSelect.disabled = true;
+        }
+    } else {
+        tratamientoSelect.disabled = true;
+        tratamientoSelect.innerHTML = '<option value="">Primero selecciona un doctor</option>';
+    }
+}
+
+// Inicializar si hay un doctor preseleccionado
+document.addEventListener('DOMContentLoaded', function() {
+    const doctorSelect = document.getElementById('doctor_id');
+    if (doctorSelect.value) {
+        updateTratamientos();
+    }
+});
+</script>
+{% endblock %}
+

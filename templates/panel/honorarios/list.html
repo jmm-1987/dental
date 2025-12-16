@@ -1,0 +1,107 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Honorarios{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Honorarios por Doctor</h1>
+    <div class="d-flex gap-2">
+        {% if doctor_id %}
+        <a href="{{ url_for('panel.honorarios_pdf', doctor_id=doctor_id) }}" class="btn btn-outline-danger" target="_blank">
+            <i class="bi bi-file-pdf"></i> Imprimir PDF
+        </a>
+        {% endif %}
+        <a href="{{ url_for('panel.honorario_new') }}{% if doctor_id %}?doctor_id={{ doctor_id }}{% endif %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nuevo Honorario
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="doctor_id" class="form-label">Filtrar por Doctor</label>
+                <select class="form-select" id="doctor_id" name="doctor_id" onchange="this.form.submit()">
+                    <option value="">Todos los doctores</option>
+                    {% for doctor in doctores %}
+                    <option value="{{ doctor.id }}" {% if doctor_id == doctor.id %}selected{% endif %}>
+                        {{ doctor.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if honorarios_con_info %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Doctor</th>
+                        <th>Tratamiento</th>
+                        <th>Precio Honorario</th>
+                        <th>Tratamientos Realizados</th>
+                        <th>Fecha Creación</th>
+                        <th>Última Actualización</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in honorarios_con_info %}
+                    {% set honorario = item.honorario %}
+                    {% set tratamientos = item.tratamientos %}
+                    <tr>
+                        <td><strong>{{ honorario.doctor.nombre }}</strong></td>
+                        <td>{{ honorario.nombre_tratamiento }}</td>
+                        <td><strong class="text-success">{{ "%.2f"|format(honorario.precio) }} €</strong></td>
+                        <td>
+                            {% if tratamientos %}
+                            <div class="small">
+                                {% for tratamiento_item, plan, paciente in tratamientos %}
+                                <div class="mb-1">
+                                    <strong>{{ paciente.nombre }} {{ paciente.apellidos }}</strong><br>
+                                    <span class="text-muted">Precio facturado: <strong class="text-primary">{{ "%.2f"|format(tratamiento_item.precio) }} €</strong></span>
+                                    {% if tratamiento_item.fecha_realizacion %}
+                                    <br><small class="text-muted">Fecha: {{ tratamiento_item.fecha_realizacion.strftime('%d/%m/%Y') }}</small>
+                                    {% endif %}
+                                </div>
+                                {% if not loop.last %}<hr class="my-1">{% endif %}
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted">No hay tratamientos realizados</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ honorario.fecha_creacion.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ honorario.fecha_actualizacion.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('panel.honorario_edit', honorario_id=honorario.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <form method="POST" action="{{ url_for('panel.honorario_delete', honorario_id=honorario.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este honorario?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No hay honorarios configurados. 
+            <a href="{{ url_for('panel.honorario_new') }}" class="alert-link">Crear el primer honorario</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

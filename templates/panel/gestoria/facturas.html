@@ -1,0 +1,125 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Facturas - Gestoría{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Facturas para Gestoría</h1>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+            </div>
+            <div class="col-md-3">
+                <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}">
+            </div>
+            <div class="col-md-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-select" id="estado" name="estado">
+                    <option value="todas" {% if estado == 'todas' %}selected{% endif %}>Todas</option>
+                    <option value="pagado" {% if estado == 'pagado' %}selected{% endif %}>Pagadas</option>
+                    <option value="parcial" {% if estado == 'parcial' %}selected{% endif %}>Parciales</option>
+                    <option value="pendiente" {% if estado == 'pendiente' %}selected{% endif %}>Pendientes</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                <a href="{{ url_for('panel.gestoria_facturas') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-clockwise"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Resumen -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Total Facturado</h6>
+                        <h4 class="text-primary">{{ "{:,.2f}".format(total_facturado) }} €</h4>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Base Imponible</h6>
+                        <h4 class="text-success">{{ "{:,.2f}".format(total_base_imponible) }} €</h4>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted">IVA (21%)</h6>
+                        <h4 class="text-info">{{ "{:,.2f}".format(total_iva) }} €</h4>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-muted">Nº Facturas</h6>
+                        <h4 class="text-dark">{{ facturas|length }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Listado de facturas -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nº</th>
+                        <th>Fecha</th>
+                        <th>Paciente</th>
+                        <th>Base Imponible</th>
+                        <th>IVA (21%)</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Método Pago</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if facturas %}
+                    {% for factura in facturas %}
+                    <tr>
+                        <td>#{{ factura.id }}</td>
+                        <td>{{ factura.fecha_emision.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ factura.patient.nombre }} {{ factura.patient.apellidos }}</td>
+                        <td>{{ "{:,.2f}".format(factura.total / 1.21) }} €</td>
+                        <td>{{ "{:,.2f}".format(factura.total - (factura.total / 1.21)) }} €</td>
+                        <td><strong>{{ "{:,.2f}".format(factura.total) }} €</strong></td>
+                        <td>
+                            {% if factura.estado_pago == 'pagado' %}
+                            <span class="badge bg-success">Pagado</span>
+                            {% elif factura.estado_pago == 'parcial' %}
+                            <span class="badge bg-warning">Parcial</span>
+                            {% else %}
+                            <span class="badge bg-danger">Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ factura.metodo_pago or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No hay facturas en este período</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('panel.gestoria_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver al Dashboard
+    </a>
+</div>
+{% endblock %}
+

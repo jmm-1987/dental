@@ -1,0 +1,98 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Facturar Tratamiento{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Facturar Tratamiento</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Información del Tratamiento</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Paciente:</strong> {{ paciente.nombre_completo() }}</p>
+                <p><strong>Dentista:</strong> {{ plan.dentist_user.nombre }}</p>
+                <p><strong>Descripción:</strong> {{ plan.descripcion_general or 'Sin descripción' }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Fecha creación:</strong> {{ plan.fecha_creacion.strftime('%d/%m/%Y') }}</p>
+                <p><strong>Coste estimado:</strong> {{ "%.2f"|format(plan.coste_estimado) }} €</p>
+                <p><strong>Estado:</strong> <span class="badge bg-success">{{ plan.estado }}</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if items_realizados %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Actos Realizados</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tratamiento</th>
+                        <th>Pieza</th>
+                        <th>Fecha realización</th>
+                        <th>Precio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items_realizados %}
+                    <tr>
+                        <td>{{ item.nombre_tratamiento }}</td>
+                        <td>{{ item.pieza_dental or '-' }}</td>
+                        <td>{{ item.fecha_realizacion.strftime('%d/%m/%Y') if item.fecha_realizacion else '-' }}</td>
+                        <td>{{ "%.2f"|format(item.precio) }} €</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="table-info">
+                        <td colspan="3" class="text-end"><strong>Total sugerido:</strong></td>
+                        <td><strong>{{ "%.2f"|format(total_sugerido) }} €</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Crear Factura</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="total" class="form-label">Total (€) *</label>
+                    <input type="number" step="0.01" class="form-control" id="total" name="total" value="{{ "%.2f"|format(total_sugerido) }}" required>
+                    <small class="form-text text-muted">Total sugerido basado en actos realizados: {{ "%.2f"|format(total_sugerido) }} €</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="metodo_pago" class="form-label">Método de pago</label>
+                    <select class="form-select" id="metodo_pago" name="metodo_pago">
+                        <option value="pendiente">Pendiente de pago</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="financiacion">Financiación</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-receipt"></i> Crear Factura
+                </button>
+                <a href="{{ url_for('panel.treatment_plan_detail', plan_id=plan.id) }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

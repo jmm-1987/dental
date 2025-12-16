@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}{% block panel_title %}Panel{% endblock %} - Clínica Dental{% endblock %}
+
+{% block extra_css %}
+<style>
+    .panel-nav {
+        background-color: #fff;
+        border-bottom: 2px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .panel-nav .nav {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 0;
+        margin: 0;
+    }
+    .panel-nav .nav-item {
+        list-style: none;
+    }
+    .panel-nav .nav-link {
+        color: #495057;
+        padding: 15px 20px;
+        font-weight: 500;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    .panel-nav .nav-link:hover {
+        color: #0d6efd;
+        background-color: #f8f9fa;
+        border-bottom-color: #0d6efd;
+    }
+    .panel-nav .nav-link.active {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    .panel-nav .dropdown-menu {
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .panel-nav .dropdown-item {
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .panel-nav .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Menú superior del panel -->
+<nav class="panel-nav">
+    <div class="container-fluid">
+        <ul class="nav w-100">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'panel.dashboard' %}active{% endif %}" href="{{ url_for('panel.dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            {% if current_user.is_admin() or current_user.is_recepcionista() %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'pacientes' in request.endpoint %}active{% endif %}" href="{{ url_for('panel.pacientes_list') }}">
+                    <i class="bi bi-people"></i> Pacientes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'citas' in request.endpoint %}active{% endif %}" href="{{ url_for('panel.citas_list') }}">
+                    <i class="bi bi-calendar"></i> Citas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'tratamientos' in request.endpoint and 'treatment_plans_list' not in request.endpoint %}active{% endif %}" href="{{ url_for('panel.treatments_list') }}">
+                    <i class="bi bi-clipboard-pulse"></i> Tratamientos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'facturas' in request.endpoint or 'invoice' in request.endpoint %}active{% endif %}" href="{{ url_for('panel.invoices_list') }}">
+                    <i class="bi bi-receipt"></i> Facturas
+                </a>
+            </li>
+            {% endif %}
+            {% if current_user.is_admin() or current_user.is_recepcionista() %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'fichaje' in request.endpoint or 'dias-libres' in request.endpoint %}active{% endif %}" href="{{ url_for('panel.fichaje_dashboard') }}">
+                    <i class="bi bi-clock-history"></i> Fichaje
+                </a>
+            </li>
+            {% endif %}
+            {% if current_user.is_admin() %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'honorarios' in request.endpoint %}active{% endif %}" href="{{ url_for('panel.honorarios_list') }}">
+                    <i class="bi bi-cash-coin"></i> Honorarios
+                </a>
+            </li>
+            <li class="nav-item dropdown ms-auto">
+                <a class="nav-link dropdown-toggle {% if 'salas' in request.endpoint or 'usuarios' in request.endpoint or 'configuracion' in request.endpoint %}active{% endif %}" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-gear"></i> Administración
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{{ url_for('panel.rooms_list') }}">
+                        <i class="bi bi-door-open"></i> Salas/Sillones
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('panel.users_list') }}">
+                        <i class="bi bi-people"></i> Usuarios
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('panel.clinic_settings') }}">
+                        <i class="bi bi-building"></i> Configuración Clínica
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('panel.gestoria_dashboard') }}">
+                        <i class="bi bi-calculator"></i> Gestoría
+                    </a></li>
+                </ul>
+            </li>
+            {% endif %}
+            {% if current_user.is_dentist() %}
+            <li class="nav-item">
+                <a class="nav-link {% if 'citas' in request.endpoint %}active{% endif %}" href="{{ url_for('panel.citas_list') }}">
+                    <i class="bi bi-calendar"></i> Mis Citas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'tratamientos' in request.endpoint and 'treatment_plans_list' not in request.endpoint %}active{% endif %}" href="{{ url_for('panel.treatments_list') }}">
+                    <i class="bi bi-clipboard-pulse"></i> Mis Tratamientos
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<!-- Contenido principal -->
+<div class="container-fluid">
+    {% block panel_content %}{% endblock %}
+</div>
+{% endblock %}
+
+
+

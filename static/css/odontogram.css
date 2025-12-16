@@ -1,0 +1,171 @@
+/* Estilos para el odontograma visual realista */
+
+.odontogram-container {
+    background: linear-gradient(to bottom, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%);
+    padding: 40px 20px;
+    border-radius: 15px;
+    border: 2px solid #dee2e6;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.jaw-section {
+    margin-bottom: 50px;
+}
+
+.jaw-label {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #495057;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.teeth-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 20px 0;
+}
+
+.quadrant {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.quadrant-1, .quadrant-2 {
+    flex-direction: row-reverse;
+}
+
+.quadrant-3, .quadrant-4 {
+    flex-direction: row;
+}
+
+.tooth {
+    position: relative;
+    width: 60px;
+    height: 85px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.tooth:hover {
+    transform: scale(1.15);
+    z-index: 10;
+}
+
+.tooth-number {
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 3px;
+    z-index: 2;
+    background: rgba(255,255,255,0.9);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.tooth-svg {
+    width: 100%;
+    height: 75px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+    transition: all 0.3s ease;
+}
+
+/* Estados de los dientes */
+.tooth.selected .tooth-svg {
+    filter: drop-shadow(0 0 10px rgba(13, 110, 253, 0.6));
+    transform: scale(1.05);
+}
+
+.tooth.sano .tooth-svg {
+    filter: drop-shadow(0 2px 4px rgba(40, 167, 69, 0.3));
+}
+
+.tooth.caries .tooth-svg {
+    filter: drop-shadow(0 2px 4px rgba(220, 53, 69, 0.4));
+}
+
+.tooth.empaste .tooth-svg {
+    filter: drop-shadow(0 2px 4px rgba(255, 193, 7, 0.4));
+}
+
+.tooth.corona .tooth-svg {
+    filter: drop-shadow(0 2px 4px rgba(13, 110, 253, 0.4));
+}
+
+.tooth.endodoncia .tooth-svg {
+    filter: drop-shadow(0 2px 4px rgba(23, 162, 184, 0.4));
+}
+
+.tooth.implante .tooth-svg {
+    filter: drop-shadow(0 2px 4px rgba(111, 66, 193, 0.4));
+}
+
+.tooth.extraccion .tooth-svg,
+.tooth.ausente .tooth-svg {
+    opacity: 0.4;
+    filter: grayscale(100%);
+}
+
+/* Leyenda */
+.legend-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.legend-color {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #ced4da;
+    border-radius: 4px;
+    display: inline-block;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.legend-color.sano { background-color: #d4edda; border-color: #28a745; }
+.legend-color.caries { background-color: #f8d7da; border-color: #dc3545; }
+.legend-color.empaste { background-color: #fff3cd; border-color: #ffc107; }
+.legend-color.corona { background-color: #e7f3ff; border-color: #0d6efd; }
+.legend-color.endodoncia { background-color: #d1ecf1; border-color: #17a2b8; }
+.legend-color.implante { background-color: #f0e6ff; border-color: #6f42c1; }
+.legend-color.extraccion,
+.legend-color.ausente { background-color: #e9ecef; border-color: #6c757d; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tooth {
+        width: 45px;
+        height: 70px;
+    }
+    
+    .tooth-svg {
+        height: 60px;
+    }
+    
+    .odontogram-container {
+        padding: 20px 10px;
+    }
+}

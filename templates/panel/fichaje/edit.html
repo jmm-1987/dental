@@ -1,0 +1,57 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Editar Fichaje{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Editar Fichaje</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Empleado</label>
+                    <input type="text" class="form-control" value="{{ fichaje.user.nombre }}" disabled>
+                </div>
+                <div class="col-md-6">
+                    <label for="fecha" class="form-label">Fecha *</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" value="{{ fichaje.fecha }}" required>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="hora_entrada" class="form-label">Hora de Entrada</label>
+                    <input type="time" class="form-control" id="hora_entrada" name="hora_entrada" value="{{ fichaje.hora_entrada.strftime('%H:%M') if fichaje.hora_entrada else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label for="hora_salida" class="form-label">Hora de Salida</label>
+                    <input type="time" class="form-control" id="hora_salida" name="hora_salida" value="{{ fichaje.hora_salida.strftime('%H:%M') if fichaje.hora_salida else '' }}">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="notas" class="form-label">Notas</label>
+                <textarea class="form-control" id="notas" name="notas" rows="3">{{ fichaje.notas or '' }}</textarea>
+            </div>
+            
+            {% if fichaje.horas_trabajadas > 0 %}
+            <div class="alert alert-info">
+                <strong>Horas trabajadas:</strong> {{ fichaje.horas_trabajadas }}h
+                {% if fichaje.horas_extras > 0 %}
+                | <strong>Horas extras:</strong> {{ fichaje.horas_extras }}h
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Actualizar Fichaje
+                </button>
+                <a href="{{ url_for('panel.fichaje_dashboard') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

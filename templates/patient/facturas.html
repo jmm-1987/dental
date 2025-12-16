@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Facturas - Clínica Dental{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Mis Facturas</h1>
+
+<div class="card">
+    <div class="card-body">
+        {% if facturas %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nº Factura</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Pagado</th>
+                        <th>Pendiente</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for factura in facturas %}
+                    <tr>
+                        <td>#{{ factura.id }}</td>
+                        <td>{{ factura.fecha_emision.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ "%.2f"|format(factura.total) }} €</td>
+                        <td>{{ "%.2f"|format(factura.calcular_total_pagado()) }} €</td>
+                        <td>{{ "%.2f"|format(factura.calcular_saldo_pendiente()) }} €</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if factura.estado_pago == 'pagado' else 'warning' if factura.estado_pago == 'parcial' else 'danger' }}">
+                                {{ factura.estado_pago }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('patient.factura_detail', invoice_id=factura.id) }}" class="btn btn-sm btn-outline-primary">
+                                Ver detalles
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No tienes facturas registradas.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+

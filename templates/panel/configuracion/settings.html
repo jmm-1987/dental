@@ -1,0 +1,105 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Configuración de la Clínica{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Configuración de la Clínica</h1>
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Estos datos se utilizarán para generar facturas y presupuestos.
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <h5 class="mb-3">Datos Generales</h5>
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="nombre_clinica" class="form-label">Nombre de la Clínica *</label>
+                    <input type="text" class="form-control" id="nombre_clinica" name="nombre_clinica" value="{{ settings.nombre_clinica }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="nif_cif" class="form-label">NIF/CIF</label>
+                    <input type="text" class="form-control" id="nif_cif" name="nif_cif" value="{{ settings.nif_cif or '' }}">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="direccion" class="form-label">Dirección</label>
+                <input type="text" class="form-control" id="direccion" name="direccion" value="{{ settings.direccion or '' }}">
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="codigo_postal" class="form-label">Código Postal</label>
+                    <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" value="{{ settings.codigo_postal or '' }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="ciudad" class="form-label">Ciudad</label>
+                    <input type="text" class="form-control" id="ciudad" name="ciudad" value="{{ settings.ciudad or '' }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="provincia" class="form-label">Provincia</label>
+                    <input type="text" class="form-control" id="provincia" name="provincia" value="{{ settings.provincia or '' }}">
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <h5 class="mb-3">Contacto</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ settings.telefono or '' }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ settings.email or '' }}">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="web" class="form-label">Sitio Web</label>
+                <input type="url" class="form-control" id="web" name="web" value="{{ settings.web or '' }}" placeholder="https://...">
+            </div>
+            
+            <div class="mb-3">
+                <label for="logo_url" class="form-label">URL del Logo</label>
+                <input type="text" class="form-control" id="logo_url" name="logo_url" value="{{ settings.logo_url or '' }}" placeholder="/static/logo.png o URL completa">
+                <small class="form-text text-muted">Ruta relativa desde static (ej: logo.png) o URL completa. Este logo aparecerá en el pie de página.</small>
+            </div>
+            
+            <hr class="my-4">
+            
+            <h5 class="mb-3">Datos Profesionales</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="numero_colegio" class="form-label">Número de Colegio Profesional</label>
+                    <input type="text" class="form-control" id="numero_colegio" name="numero_colegio" value="{{ settings.numero_colegio or '' }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="iban" class="form-label">IBAN</label>
+                    <input type="text" class="form-control" id="iban" name="iban" value="{{ settings.iban or '' }}" placeholder="ES00 0000 0000 0000 0000 0000">
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <h5 class="mb-3">Facturas y Presupuestos</h5>
+            <div class="mb-3">
+                <label for="notas_pie_factura" class="form-label">Notas para Pie de Factura</label>
+                <textarea class="form-control" id="notas_pie_factura" name="notas_pie_factura" rows="4" placeholder="Ej: Forma de pago, condiciones, etc.">{{ settings.notas_pie_factura or '' }}</textarea>
+                <small class="form-text text-muted">Este texto aparecerá al final de las facturas y presupuestos.</small>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Guardar Configuración
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

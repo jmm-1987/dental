@@ -1,0 +1,163 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Tratamientos{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Tratamientos</h1>
+
+<!-- Estadísticas rápidas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">{{ stats.total }}</h5>
+                <p class="card-text text-muted mb-0">Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h5 class="card-title text-warning">{{ stats.propuestos }}</h5>
+                <p class="card-text text-muted mb-0">Propuestos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-info">
+            <div class="card-body">
+                <h5 class="card-title text-info">{{ stats.en_curso }}</h5>
+                <p class="card-text text-muted mb-0">En Curso</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h5 class="card-title text-success">{{ stats.finalizados }}</h5>
+                <p class="card-text text-muted mb-0">Finalizados</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('panel.treatments_list') }}" class="row g-3">
+            <div class="col-md-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select class="form-select" id="estado" name="estado">
+                    <option value="">Todos los estados</option>
+                    <option value="propuesto" {% if estado == 'propuesto' %}selected{% endif %}>Propuesto</option>
+                    <option value="en_curso" {% if estado == 'en_curso' %}selected{% endif %}>En Curso</option>
+                    <option value="finalizado" {% if estado == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                    <option value="cancelado" {% if estado == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="patient_id" class="form-label">Paciente</label>
+                <select class="form-select" id="patient_id" name="patient_id">
+                    <option value="">Todos los pacientes</option>
+                    {% for paciente in pacientes %}
+                    <option value="{{ paciente.id }}" {% if patient_id == paciente.id %}selected{% endif %}>
+                        {{ paciente.nombre_completo() }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="dentist_id" class="form-label">Dentista</label>
+                <select class="form-select" id="dentist_id" name="dentist_id">
+                    <option value="">Todos los dentistas</option>
+                    {% for dentista in dentistas %}
+                    <option value="{{ dentista.id }}" {% if dentist_id == dentista.id %}selected{% endif %}>
+                        {{ dentista.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+            {% if estado or patient_id or dentist_id %}
+            <div class="col-md-12">
+                <a href="{{ url_for('panel.treatments_list') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle"></i> Limpiar filtros
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Listado de tratamientos -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Listado de Tratamientos</h5>
+        <span class="badge bg-secondary">{{ tratamientos|length }} tratamiento(s)</span>
+    </div>
+    <div class="card-body">
+        {% if tratamientos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Descripción</th>
+                        <th>Dentista</th>
+                        <th>Estado</th>
+                        <th>Coste Estimado</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tratamiento in tratamientos %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('panel.paciente_detail', patient_id=tratamiento.patient_id) }}">
+                                {{ tratamiento.patient.nombre_completo() }}
+                            </a>
+                        </td>
+                        <td>
+                            <strong>{{ tratamiento.descripcion_general[:50] }}{% if tratamiento.descripcion_general|length > 50 %}...{% endif %}</strong>
+                        </td>
+                        <td>{{ tratamiento.dentist_user.nombre }}</td>
+                        <td>
+                            <span class="badge bg-{% if tratamiento.estado == 'finalizado' %}success{% elif tratamiento.estado == 'en_curso' %}info{% elif tratamiento.estado == 'propuesto' %}warning{% else %}secondary{% endif %}">
+                                {{ tratamiento.estado|replace('_', ' ')|title }}
+                            </span>
+                        </td>
+                        <td>{{ "%.2f"|format(tratamiento.coste_estimado) }} €</td>
+                        <td>{{ tratamiento.fecha_creacion.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('panel.treatment_plan_detail', plan_id=tratamiento.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> Ver
+                            </a>
+                            {% if tratamiento.estado == 'finalizado' %}
+                            <a href="{{ url_for('panel.treatment_invoice', plan_id=tratamiento.id) }}" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-receipt"></i> Facturar
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No se encontraron tratamientos con los filtros seleccionados.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+

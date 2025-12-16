@@ -1,0 +1,62 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Doctores{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Doctores</h1>
+    <a href="{{ url_for('panel.doctor_new') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Doctor
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if doctores %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Estado</th>
+                        <th>Fecha creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doctor in doctores %}
+                    <tr>
+                        <td><strong>{{ doctor.nombre }}</strong></td>
+                        <td>{{ doctor.email }}</td>
+                        <td>
+                            {% if doctor.activo %}
+                            <span class="badge bg-success">Activo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ doctor.fecha_creacion.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('panel.doctor_edit', doctor_id=doctor.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <a href="{{ url_for('panel.doctor_schedule', doctor_id=doctor.id) }}" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-calendar-week"></i> Horario
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No hay doctores registrados. 
+            <a href="{{ url_for('panel.doctor_new') }}" class="alert-link">Crear el primer doctor</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

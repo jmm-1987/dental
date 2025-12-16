@@ -1,0 +1,138 @@
+{% extends "panel/base.html" %}
+
+{% block panel_title %}Plan de Tratamiento{% endblock %}
+
+{% block panel_content %}
+<h1 class="mb-4">Plan de Tratamiento</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">{{ plan.descripcion_general }}</h5>
+            <span class="badge bg-{{ 'success' if plan.estado == 'finalizado' else 'warning' if plan.estado == 'en_curso' else 'secondary' }}">
+                {{ plan.estado }}
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <p><strong>Paciente:</strong> {{ plan.patient.nombre_completo() }}</p>
+        <p><strong>Dentista:</strong> {{ plan.dentist_user.nombre }}</p>
+        <p><strong>Coste estimado:</strong> {{ "%.2f"|format(plan.coste_estimado) }} €</p>
+        <p><strong>Fecha creación:</strong> {{ plan.fecha_creacion.strftime('%d/%m/%Y') }}</p>
+        
+        {% if plan.estado == 'finalizado' %}
+        <div class="alert alert-success mt-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-check-circle"></i> Tratamiento finalizado. Listo para facturar.</span>
+                <a href="{{ url_for('panel.treatment_invoice', plan_id=plan.id) }}" class="btn btn-success">
+                    <i class="bi bi-receipt"></i> Facturar Tratamiento
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <form method="POST" action="{{ url_for('panel.treatment_plan_detail', plan_id=plan.id) }}" class="mt-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Cambiar estado</label>
+                    <select name="estado" class="form-select">
+                        <option value="propuesto" {% if plan.estado == 'propuesto' %}selected{% endif %}>Propuesto</option>
+                        <option value="en_curso" {% if plan.estado == 'en_curso' %}selected{% endif %}>En curso</option>
+                        <option value="finalizado" {% if plan.estado == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                        <option value="cancelado" {% if plan.estado == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Actualizar estado</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Añadir acto -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Añadir Acto al Plan</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('panel.treatment_item_new', plan_id=plan.id) }}">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="nombre_tratamiento" class="form-label">Nombre del tratamiento *</label>
+                    <input type="text" class="form-control" id="nombre_tratamiento" name="nombre_tratamiento" required>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="pieza_dental" class="form-label">Pieza dental</label>
+                    <input type="text" class="form-control" id="pieza_dental" name="pieza_dental" placeholder="Ej: 2.6">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="fecha_prevista" class="form-label">Fecha prevista</label>
+                    <input type="date" class="form-control" id="fecha_prevista" name="fecha_prevista">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="precio" class="form-label">Precio (€)</label>
+                    <input type="number" step="0.01" class="form-control" id="precio" name="precio" value="0">
+                </div>
+                <div class="col-md-2 d-flex align-items-end mb-3">
+                    <button type="submit" class="btn btn-primary w-100">Añadir</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Listado de actos -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Actos del Plan</h5>
+    </div>
+    <div class="card-body">
+        {% if items %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tratamiento</th>
+                        <th>Pieza</th>
+                        <th>Fecha prevista</th>
+                        <th>Fecha realización</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.nombre_tratamiento }}</td>
+                        <td>{{ item.pieza_dental or '-' }}</td>
+                        <td>{{ item.fecha_prevista.strftime('%d/%m/%Y') if item.fecha_prevista else '-' }}</td>
+                        <td>{{ item.fecha_realizacion.strftime('%d/%m/%Y') if item.fecha_realizacion else '-' }}</td>
+                        <td>{{ "%.2f"|format(item.precio) }} €</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if item.estado == 'realizado' else 'warning' if item.estado == 'pendiente' else 'secondary' }}">
+                                {{ item.estado }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if item.estado == 'pendiente' %}
+                            <form method="POST" action="{{ url_for('panel.treatment_item_mark_done', item_id=item.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check-circle"></i> Marcar realizado
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No hay actos registrados en este plan.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
