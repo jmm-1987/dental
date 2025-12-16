@@ -28,9 +28,9 @@ instance/
 .webassets-cache
 
 # Base de datos
-*.db
-*.sqlite
-*.sqlite3
+#*.db
+#*.sqlite
+#*.sqlite3
 
 # IDE
 .vscode/
