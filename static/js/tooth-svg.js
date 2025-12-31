@@ -159,3 +159,5 @@ window.createToothSVG = createToothSVG;
 window.getToothType = getToothType;
 
 
+
+

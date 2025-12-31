@@ -207,7 +207,8 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
 <script>
-    let currentWeekStart = new Date('{{ start_of_week.strftime("%Y-%m-%d") }}');
+    // Actualizar currentWeekStart que ya está declarado en calendar.js
+    currentWeekStart = new Date('{{ start_of_week.strftime("%Y-%m-%d") }}');
     const pacientes = {{ pacientes_json | tojson }};
     const dentistas = {{ dentistas_json | tojson }};
     const salas = {{ salas_json | tojson }};
@@ -216,51 +217,7 @@
     window.salas = salas || [];
     
     let searchTimeoutCalendar;
-    
-    // Búsqueda de pacientes en el modal del calendario
-    document.getElementById('cita-patient-search').addEventListener('input', function(e) {
-        const query = e.target.value.trim();
-        const resultsDiv = document.getElementById('cita-patient-results');
-        
-        clearTimeout(searchTimeoutCalendar);
-        
-        if (query.length < 2) {
-            resultsDiv.style.display = 'none';
-            return;
-        }
-        
-        searchTimeoutCalendar = setTimeout(() => {
-            fetch(`/panel/api/pacientes/buscar?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    resultsDiv.innerHTML = '';
-                    
-                    if (data.pacientes && data.pacientes.length > 0) {
-                        data.pacientes.forEach(paciente => {
-                            const item = document.createElement('a');
-                            item.className = 'list-group-item list-group-item-action';
-                            item.href = '#';
-                            item.innerHTML = `
-                                <div class="fw-bold">${paciente.nombre_completo}</div>
-                                <small class="text-muted">${paciente.email}${paciente.telefono ? ' | ' + paciente.telefono : ''}</small>
-                            `;
-                            item.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                selectPatientCalendar(paciente.id, paciente.nombre_completo);
-                            });
-                            resultsDiv.appendChild(item);
-                        });
-                        resultsDiv.style.display = 'block';
-                    } else {
-                        resultsDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron pacientes</div>';
-                        resultsDiv.style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al buscar pacientes:', error);
-                });
-        }, 300);
-    });
+    let patientSearchHandler = null;
     
     // Seleccionar paciente en el calendario
     function selectPatientCalendar(id, nombreCompleto) {
@@ -268,6 +225,90 @@
         document.getElementById('cita-patient-search').value = nombreCompleto;
         document.getElementById('cita-patient-selected-text').textContent = `Paciente seleccionado: ${nombreCompleto}`;
         document.getElementById('cita-patient-results').style.display = 'none';
+    }
+    
+    // Función para inicializar la búsqueda de pacientes
+    function initPatientSearch() {
+        const searchInput = document.getElementById('cita-patient-search');
+        if (!searchInput) {
+            console.log('No se encontró el campo de búsqueda');
+            return;
+        }
+        
+        // Remover listener anterior si existe
+        if (patientSearchHandler) {
+            searchInput.removeEventListener('input', patientSearchHandler);
+        }
+        
+        // Crear nuevo handler
+        patientSearchHandler = function(e) {
+            const query = e.target.value.trim();
+            const resultsDiv = document.getElementById('cita-patient-results');
+            
+            clearTimeout(searchTimeoutCalendar);
+            
+            if (query.length < 2) {
+                if (resultsDiv) {
+                    resultsDiv.style.display = 'none';
+                }
+                return;
+            }
+            
+            searchTimeoutCalendar = setTimeout(() => {
+                console.log('Buscando pacientes con query:', query);
+                fetch(`/panel/api/pacientes/buscar?q=${encodeURIComponent(query)}`)
+                    .then(response => {
+                        console.log('Respuesta recibida:', response.status);
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta del servidor: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Datos recibidos:', data);
+                        if (!resultsDiv) {
+                            console.log('No se encontró el div de resultados');
+                            return;
+                        }
+                        
+                        resultsDiv.innerHTML = '';
+                        
+                        if (data.pacientes && data.pacientes.length > 0) {
+                            console.log('Encontrados', data.pacientes.length, 'pacientes');
+                            data.pacientes.forEach(paciente => {
+                                const item = document.createElement('a');
+                                item.className = 'list-group-item list-group-item-action';
+                                item.href = '#';
+                                item.innerHTML = `
+                                    <div class="fw-bold">${paciente.nombre_completo}</div>
+                                    <small class="text-muted">${paciente.email}${paciente.telefono ? ' | ' + paciente.telefono : ''}</small>
+                                `;
+                                item.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    selectPatientCalendar(paciente.id, paciente.nombre_completo);
+                                });
+                                resultsDiv.appendChild(item);
+                            });
+                            resultsDiv.style.display = 'block';
+                        } else {
+                            console.log('No se encontraron pacientes');
+                            resultsDiv.innerHTML = '<div class="list-group-item text-muted">No se encontraron pacientes</div>';
+                            resultsDiv.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al buscar pacientes:', error);
+                        if (resultsDiv) {
+                            resultsDiv.innerHTML = '<div class="list-group-item text-danger">Error al buscar pacientes</div>';
+                            resultsDiv.style.display = 'block';
+                        }
+                    });
+            }, 300);
+        };
+        
+        // Agregar listener
+        searchInput.addEventListener('input', patientSearchHandler);
+        console.log('Listener de búsqueda agregado');
     }
     
     // Ocultar resultados al hacer click fuera
@@ -281,7 +322,9 @@
     });
     
     // Crear paciente rápido desde calendario
-    document.getElementById('btn-guardar-paciente-calendar').addEventListener('click', function() {
+    const btnGuardarPaciente = document.getElementById('btn-guardar-paciente-calendar');
+    if (btnGuardarPaciente) {
+        btnGuardarPaciente.addEventListener('click', function() {
         const data = {
             nombre: document.getElementById('modal_calendar_nombre').value,
             apellidos: document.getElementById('modal_calendar_apellidos').value,
@@ -318,21 +361,35 @@
             console.error('Error:', error);
             alert('Error al crear el paciente');
         });
-    });
+        });
+    }
     
-    // Limpiar campo de búsqueda al abrir el modal
-    document.getElementById('modalNuevaCita').addEventListener('show.bs.modal', function() {
-        document.getElementById('cita-patient-search').value = '';
-        document.getElementById('cita-patient').value = '';
-        document.getElementById('cita-patient-selected-text').textContent = '';
-        const resultsDiv = document.getElementById('cita-patient-results');
-        if (resultsDiv) {
-            resultsDiv.style.display = 'none';
-        }
-    });
+    // Limpiar campo de búsqueda al abrir el modal e inicializar búsqueda
+    const modalNuevaCita = document.getElementById('modalNuevaCita');
+    if (modalNuevaCita) {
+        modalNuevaCita.addEventListener('show.bs.modal', function() {
+            const searchInput = document.getElementById('cita-patient-search');
+            const patientInput = document.getElementById('cita-patient');
+            const selectedText = document.getElementById('cita-patient-selected-text');
+            const resultsDiv = document.getElementById('cita-patient-results');
+            
+            if (searchInput) searchInput.value = '';
+            if (patientInput) patientInput.value = '';
+            if (selectedText) selectedText.textContent = '';
+            if (resultsDiv) resultsDiv.style.display = 'none';
+            
+            // Inicializar búsqueda cuando se muestra el modal (asegurarse de que el elemento existe)
+            setTimeout(() => {
+                initPatientSearch();
+            }, 100);
+        });
+    }
     
+    // Inicializar búsqueda cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', function() {
         loadCalendar();
+        // Intentar inicializar inmediatamente
+        initPatientSearch();
     });
 </script>
 {% endblock %}

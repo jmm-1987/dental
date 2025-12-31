@@ -48,3 +48,5 @@ Esta aplicación está preparada para desplegarse en Render.
 - Shell: `render shell`
 - Ejecutar migraciones: `python migrate_db.py` (si es necesario)
 
+
+
